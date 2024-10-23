@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Maps to Supabase auth.users
+model User {
+  id            String         @id @db.Uuid
+  email         String?        @unique
+  isAdmin       Boolean        @default(false) @map("is_admin")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  lastLogin     DateTime?      @map("last_login")
+  lastLogout    DateTime?      @map("last_logout")
+  totpEnabled   Boolean        @default(false) @map("totp_enabled")
+  totpSecret    String?        @map("totp_secret")
+  profile       Profile?
+  projects      Project[]
+  teamMembers   TeamMember[]
+  ownedTeams    Team[]         @relation("TeamOwner")
+  invitations   TeamInvite[]   @relation("InvitedUser")
+  sentInvites   TeamInvite[]   @relation("InvitingSender")
+
+  @@map("users")
+}
+
+model Profile {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  fullName  String?  @map("full_name")
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Project {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  slug        String   @unique
+  icon        String
+  description String?
+  userId      String   @map("user_id") @db.Uuid
+  teamId      String?  @map("team_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team        Team?    @relation(fields: [teamId], references: [id])
+
+  @@index([userId])
+  @@index([teamId])
+  @@map("projects")
+}
+
+model Team {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  slug        String       @unique
+  ownerId     String       @map("owner_id") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  owner       User         @relation("TeamOwner", fields: [ownerId], references: [id])
+  members     TeamMember[]
+  projects    Project[]
+  invitations TeamInvite[]
+  settings    TeamSettings?
+
+  @@index([ownerId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teamId    String    @map("team_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  role      TeamRole  @default(MEMBER)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+  @@map("team_members")
+}
+
+model TeamInvite {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teamId    String      @map("team_id") @db.Uuid
+  email     String
+  senderId  String      @map("sender_id") @db.Uuid
+  status    InviteStatus @default(PENDING)
+  userId    String?     @map("user_id") @db.Uuid
+  expiresAt DateTime    @map("expires_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  team      Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sender    User        @relation("InvitingSender", fields: [senderId], references: [id])
+  user      User?       @relation("InvitedUser", fields: [userId], references: [id])
+
+  @@index([teamId])
+  @@index([email])
+  @@map("team_invites")
+}
+
+model TeamSettings {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teamId        String   @unique @map("team_id") @db.Uuid
+  maxMembers    Int      @default(5) @map("max_members")
+  allowInvites  Boolean  @default(true) @map("allow_invites")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  team          Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@map("team_settings")
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}

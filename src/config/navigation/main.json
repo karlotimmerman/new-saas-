@@ -1,0 +1,53 @@
+{
+    "main": [
+      {
+        "title": "Dashboard",
+        "url": "/protected/dashboard",
+        "icon": "LayoutDashboard"
+      },
+      {
+        "title": "Admin",
+        "url": "/@admin",
+        "icon": "ShieldCheck",
+        "items": [
+          {
+            "title": "Users",
+            "url": "/@admin/users",
+            "icon": "Users"
+          },
+          {
+            "title": "Billing",
+            "url": "/@admin/billing",
+            "icon": "CreditCard"
+          },
+          {
+            "title": "Usage",
+            "url": "/@admin/usage",
+            "icon": "BarChart2"
+          },
+          {
+            "title": "Cost",
+            "url": "/@admin/cost",
+            "icon": "DollarSign"
+          },
+          {
+            "title": "Limits",
+            "url": "/@admin/limits",
+            "icon": "Sliders"
+          }
+        ]
+      }
+    ],
+    "secondary": [
+      {
+        "title": "Support",
+        "url": "/support",
+        "icon": "LifeBuoy"
+      },
+      {
+        "title": "Feedback",
+        "url": "/feedback",
+        "icon": "Send"
+      }
+    ]
+  }

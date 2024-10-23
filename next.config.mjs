@@ -5,6 +5,7 @@ const nextConfig = {
   images: {
     domains: [
       "your-image-domain.com",
+      "github.com",
       "supabase.co", // Add if you're using Supabase Storage
     ],
     remotePatterns: [
@@ -18,7 +19,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ["localhost:3000", "your-production-domain.com"],
+      allowedOrigins: ["localhost:3000", "skydust.app"],
       bodySizeLimit: "2mb",
     },
     scrollRestoration: true,

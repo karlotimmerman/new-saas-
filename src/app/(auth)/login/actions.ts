@@ -1,85 +1,137 @@
-"use server";
+"use server"
 
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { Database } from "@/types/supabase";
 import { routes } from "@/config/routes";
 
-interface LoginResult {
-  error?: string;
-}
-
-export async function login(formData: FormData): Promise<LoginResult> {
+function getSupabase() {
   const cookieStore = cookies();
-
-  const supabase = createServerClient<Database>(
+  
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-        set: (
-          name: string,
-          value: string,
-          options: {
-            path: string;
-            maxAge: number;
-            sameSite: "lax" | "strict" | "none";
-          },
-        ) => cookieStore.set(name, value, options),
-        remove: (name: string, options: { path: string }) =>
-          cookieStore.set(name, "", { ...options, maxAge: 0 }),
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set(name, value, options);
+        },
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set(name, "", { ...options, maxAge: 0 });
+        },
       },
-    },
+    }
   );
-
-  const email = formData.get("email");
-  const password = formData.get("password");
-
-  if (typeof email !== "string" || typeof password !== "string") {
-    return { error: "Invalid email or password format" };
-  }
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  const { data: factorsData } = await supabase.auth.mfa.listFactors();
-
-  if (factorsData?.totp && factorsData.totp.length > 0) {
-    // User has 2FA enabled, redirect to 2FA verification page
-    redirect(routes.twoFactorVerify);
-  }
-
-  // No 2FA, proceed with normal login
-  redirect(routes.dashboard);
 }
 
-export async function signup(formData: FormData): Promise<LoginResult> {
-  const cookieStore = cookies();
-  const supabase = createServerActionClient<Database>({
-    cookies: () => cookieStore,
-  });
+async function syncUserWithPrisma(user: Database["auth"]["users"]) {
+  try {
+    return await prisma.user.upsert({
+      where: { id: user.id },
+      update: {
+        lastLogin: new Date(),
+        email: user.email,
+        isAdmin: user.user_metadata?.is_admin ?? false,
+      },
+      create: {
+        id: user.id,
+        email: user.email!,
+        isAdmin: user.user_metadata?.is_admin ?? false,
+        profile: {
+          create: {
+            fullName: user.user_metadata?.full_name,
+          }
+        },
+        teamMembers: user.user_metadata?.team_id ? {
+          create: {
+            teamId: user.user_metadata.team_id,
+            role: user.user_metadata?.is_team_owner ? "OWNER" : "MEMBER"
+          }
+        } : undefined
+      }
+    });
+  } catch (error) {
+    console.error('Error syncing user with Prisma:', error);
+    throw error;
+  }
+}
 
-  const email = formData.get("email");
-  const password = formData.get("password");
+export async function login(formData: FormData): Promise<{ error?: string }> {
+  const supabase = getSupabase();
+  
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-  if (typeof email !== "string" || typeof password !== "string") {
-    return { error: "Invalid email or password format" };
+  if (!email || !password) {
+    return { error: "Email and password are required" };
   }
 
-  const { error } = await supabase.auth.signUp({ email, password });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) {
-    return { error: error.message };
+    if (error) {
+      return { error: error.message };
+    }
+
+    if (data.user) {
+      // Sync with Prisma
+      await syncUserWithPrisma(data.user);
+
+      // Check for 2FA
+      const { data: factorsData } = await supabase.auth.mfa.listFactors();
+
+      if (factorsData?.totp && factorsData.totp.length > 0) {
+        redirect(routes.twoFactorVerify);
+      }
+
+      redirect(routes.dashboard);
+    }
+
+    return { error: "Login failed" };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { error: 'An unexpected error occurred' };
+  }
+}
+
+export async function signup(formData: FormData): Promise<{ error?: string }> {
+  const supabase = getSupabase();
+
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    return { error: "Email and password are required" };
   }
 
-  revalidatePath("/", "layout");
-  redirect("/");
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}${routes.authCallback}`,
+      },
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    if (data.user) {
+      await syncUserWithPrisma(data.user);
+    }
+
+    return {};
+  } catch (error) {
+    console.error('Signup error:', error);
+    return { error: 'An unexpected error occurred' };
+  }
 }
