@@ -117,12 +117,12 @@ async function syncPrismaSupabase() {
 
     // Step 1: Format and validate Prisma schema
     console.log(`${colors.cyan}Formatting and validating schema...${colors.reset}`)
-    await execCommand('prisma format')
-    await execCommand('prisma validate')
+    await execCommand('npx prisma format')
+    await execCommand('npx prisma validate')
 
     // Step 2: Generate fresh Prisma client
     console.log(`\n${colors.cyan}Generating Prisma client...${colors.reset}`)
-    await execCommand('prisma generate')
+    await execCommand('npx prisma generate')
 
     // Step 3: Create migration
     const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14)
@@ -130,26 +130,26 @@ async function syncPrismaSupabase() {
     
     console.log(`\n${colors.cyan}Creating migration...${colors.reset}`)
     try {
-      await execCommand(`prisma migrate dev --name ${migrationName} --create-only`)
+      await execCommand(`npx prisma migrate dev --name ${migrationName} --create-only`)
     } catch (error) {
       if (!error.message.includes('already exists')) throw error
     }
 
     // Step 4: Apply migration to Supabase
     console.log(`\n${colors.cyan}Applying migration to Supabase...${colors.reset}`)
-    await execCommand('prisma migrate deploy')
+    await execCommand('npx prisma migrate deploy')
 
     // Step 5: Push any remaining changes
     console.log(`\n${colors.cyan}Pushing any remaining schema changes...${colors.reset}`)
-    await execCommand('prisma db push')
+    await execCommand('npx prisma db push')
 
     // Step 6: Verify database schema
     console.log(`\n${colors.cyan}Verifying database schema...${colors.reset}`)
-    await execCommand('prisma db pull --force')
+    await execCommand('npx prisma db pull --force')
     
     // Step 7: Regenerate client with latest schema
     console.log(`\n${colors.cyan}Regenerating Prisma client...${colors.reset}`)
-    await execCommand('prisma generate')
+    await execCommand('npx prisma generate')
 
     console.log(`\n${colors.green}✨ Sync completed successfully!${colors.reset}\n`)
 
