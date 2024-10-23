@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { spawn } from 'child_process'
 import { fileURLToPath } from 'url'
 import path from 'path'
@@ -10,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT_DIR = path.join(__dirname, '..')
 
 // Load environment variables
-dotenv.config({ path: path.join(ROOT_DIR, '.env') })
+dotenv.config({ path: '.env.local' })
 
 // ANSI color codes for better output
 const colors = {
