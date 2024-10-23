@@ -1,19 +1,17 @@
-import Link from 'next/link'
-import { Inter } from 'next/font/google'
-import { Button } from "@/components/ui/button"
-
-// Initialize the Inter font
-const inter = Inter({ subsets: ['latin'] })
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function LandingPage() {
   return (
-    <div className={`flex flex-col min-h-screen ${inter.className}`}>
+    <div className="flex flex-col min-h-screen">
       <header className="py-6 px-4 sm:px-6 lg:px-8">
         <nav className="flex justify-between items-center">
           <div className="text-2xl font-bold">SKY DUST AI</div>
-          <Link href="/login" passHref>
-            <Button variant="outline">Login</Button>
-          </Link>
+          <div>
+            <Link href="/login" passHref>
+              <Button variant="outline">Login</Button>
+            </Link>
+          </div>
         </nav>
       </header>
 
@@ -25,7 +23,7 @@ export default function LandingPage() {
           SKY DUST CSRD AI PLATFORM
         </h2>
         <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-2xl">
-         CSRD Reporting in a whole new way
+          CSRD Reporting in a whole new way
         </p>
         <div className="flex space-x-4">
           <Link href="/login" passHref>
@@ -45,5 +43,5 @@ export default function LandingPage() {
         © {new Date().getFullYear()} SKY DUST. All rights reserved.
       </footer>
     </div>
-  )
+  );
 }

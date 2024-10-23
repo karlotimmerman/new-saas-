@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Users,
@@ -13,24 +13,33 @@ import {
   Key,
   FileText,
   BarChart2,
-  DollarSign
-} from 'lucide-react'
+  DollarSign,
+} from "lucide-react";
+import { routes } from "@/config/routes";
 
 const navItems = [
-  { name: 'Dashboard', href: '/protected/admin', icon: LayoutDashboard },
-  { name: 'Details', href: '/protected/admin/details', icon: FileText },
-  { name: 'Members', href: '/protected/admin/members', icon: Users },
-  { name: 'Workspaces', href: '/protected/admin/workspaces', icon: Briefcase },
-  { name: 'Billing', href: '/protected/admin/billing', icon: CreditCard },
-  { name: 'Limits', href: '/protected/admin/limits', icon: Sliders },
-  { name: 'API keys', href: '/protected/admin/api-keys', icon: Key },
-  { name: 'Logs', href: '/protected/admin/logs', icon: FileText },
-  { name: 'Usage', href: '/protected/admin/usage', icon: BarChart2 },
-  { name: 'Cost', href: '/protected/admin/cost', icon: DollarSign },
-]
+  { name: "Dashboard", href: routes.adminDashboard, icon: LayoutDashboard },
+  { name: "Details", href: routes.adminDashboard + "/details", icon: FileText },
+  { name: "Members", href: routes.adminUsers, icon: Users },
+  {
+    name: "Workspaces",
+    href: routes.adminDashboard + "/workspaces",
+    icon: Briefcase,
+  },
+  {
+    name: "Billing",
+    href: routes.adminDashboard + "/billing",
+    icon: CreditCard,
+  },
+  { name: "Limits", href: routes.adminDashboard + "/limits", icon: Sliders },
+  { name: "API keys", href: routes.adminDashboard + "/api-keys", icon: Key },
+  { name: "Logs", href: routes.adminDashboard + "/logs", icon: FileText },
+  { name: "Usage", href: routes.adminDashboard + "/usage", icon: BarChart2 },
+  { name: "Cost", href: routes.adminDashboard + "/cost", icon: DollarSign },
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <div className="pb-12 w-64">
@@ -47,7 +56,7 @@ export function Sidebar() {
                 variant={pathname === item.href ? "secondary" : "ghost"}
                 className={cn(
                   "w-full justify-start",
-                  pathname === item.href && "bg-muted font-medium"
+                  pathname === item.href && "bg-muted font-medium",
                 )}
               >
                 <Link href={item.href}>
@@ -60,5 +69,5 @@ export function Sidebar() {
         </div>
       </div>
     </div>
-  )
+  );
 }

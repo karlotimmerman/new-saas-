@@ -1,0 +1,113 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { useCostData } from "@/hooks/useCostData";
+
+export function CostContent() {
+  const [workspace, setWorkspace] = useState("All Workspaces");
+  const [model, setModel] = useState("All Models");
+
+  const { data: costData, isLoading, error } = useCostData();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!costData) return <div>No data available</div>;
+
+  const handleExport = () => {
+    // Implement export functionality
+    console.log("Exporting data...");
+  };
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-6">
+        <Button variant="outline" onClick={handleExport}>
+          Export
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-4 mb-6">
+        <Select value={workspace} onValueChange={setWorkspace}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="All Workspaces" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All Workspaces">All Workspaces</SelectItem>
+            {/* Add more workspaces as needed */}
+          </SelectContent>
+        </Select>
+        <Select value={model} onValueChange={setModel}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="All Models" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All Models">All Models</SelectItem>
+            {/* Add more models as needed */}
+          </SelectContent>
+        </Select>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="icon">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span>{new Date().toLocaleString("default", { month: "long" })}</span>
+          <Button variant="outline" size="icon">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <Select defaultValue="None">
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Group by: None" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="None">Group by: None</SelectItem>
+            {/* Add more grouping options as needed */}
+          </SelectContent>
+        </Select>
+      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Total cost</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-4xl font-bold">
+            US$ {costData.totalCost.toFixed(2)}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Daily cost</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={costData.dailyCosts}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="cost" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+    </>
+  );
+}

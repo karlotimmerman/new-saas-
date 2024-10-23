@@ -1,13 +1,13 @@
-import useSWR from 'swr'
+import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function useCostData() {
-  const { data, error, isLoading } = useSWR('/api/pricing/cost', fetcher)
+  const { data, error, isLoading } = useSWR("/api/pricing/cost", fetcher);
 
   return {
     data,
     isLoading,
-    error
-  }
+    error,
+  };
 }

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
 export async function GET() {
   // In a real application, you would fetch this data from a database or external API
@@ -10,8 +10,8 @@ export async function GET() {
       { date: "Oct 11", cost: 2 },
       { date: "Oct 16", cost: 10.5 },
       { date: "Oct 21", cost: 4 },
-    ]
-  }
+    ],
+  };
 
-  return NextResponse.json(costData)
+  return NextResponse.json(costData);
 }

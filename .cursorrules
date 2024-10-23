@@ -1,0 +1,103 @@
+{
+  "title": "Code Composition Instructions for TypeScript, Next.js, React, Shadcn UI, Radix UI, Tailwind, and Supabase",
+  "expertDomains": [
+    "TypeScript",
+    "Node.js",
+    "Next.js App Router",
+    "React",
+    "Shadcn UI",
+    "Radix UI",
+    "Tailwind",
+    "Supabase"
+  ],
+  "codeStyleAndStructure": {
+    "functionalAndDeclarative": {
+      "components": "Always write functional components with hooks (e.g., useState, useEffect, useContext) and avoid class-based components.",
+      "approach": "Write declarative code in JSX, describing what should happen rather than how it should happen.",
+      "principles": "Ensure that your code reflects a functional approach, avoiding mutability and side effects where possible."
+    },
+    "avoidDuplication": {
+      "techniques": [
+        "Use iteration and modularization to avoid repeating code blocks. For example, if rendering multiple buttons, use maps or loops instead of duplicating JSX.",
+        "Prefer abstracting common logic into functions, components, or hooks that can be reused across the application."
+      ]
+    },
+    "naming": {
+      "variables": "Always use auxiliary verbs like isLoading, hasError, canSubmit to clearly describe the state or behavior.",
+      "principle": "Aim for clarity over brevity in naming, especially for functions and variables, to enhance readability."
+    },
+    "fileStructure": [
+      "Exported component: The primary component in the file.",
+      "Subcomponents: Any smaller, reusable components specific to this file.",
+      "Helpers: Utility functions or helpers used by the component.",
+      "Static content: Constants or configuration specific to the component.",
+      "Types: Types and interfaces used in the file."
+    ]
+  },
+  "typescriptUsage": {
+    "allCode": "All code should be written in TypeScript. Always check if a package has included types (@web). If a package lacks types, create a *.d.ts file in /src/types/ with the necessary type declarations.",
+    "functionalComponents": "Use functional components with TypeScript for every component or page, ensuring strict type checking for props, states, and custom hooks.",
+    "strictTypeDefinitions": "Always define types or interfaces for props, components, and functions. Make sure to use strong typing instead of any. You are not allowed to use any. If a type cannot be determined, use unknown instead to ensure better type safety and avoid errors in the long term."
+  },
+  "syntaxAndFormatting": {
+    "pureFunctions": "Write pure functions using the function keyword to enhance clarity and make functions more portable and reusable.",
+    "declarativeJSX": "Write JSX in a declarative manner, leveraging React's best practices to make the UI clear and readable."
+  },
+  "uiAndStyling": {
+    "libraries": "For components and styling, use the Shadcn UI and Radix UI libraries along with Tailwind CSS for utility-first styling.",
+    "responsiveDesign": "Always implement responsive design using Tailwind's mobile-first approach. Ensure that your designs are optimized for smaller screens first and then scaled up.",
+    "avoidInlineStyles": "Use Tailwind utility classes instead of inline styles to maintain consistency and avoid style duplication across components."
+  },
+  "performanceOptimization": {
+    "suspenseAndDynamicLoading": {
+      "suspense": "Wrap client components inside Suspense with appropriate fallback components to handle asynchronous loading.",
+      "lazyLoading": "Use React.lazy() for dynamic imports where possible to split bundles and optimize loading performance."
+    },
+    "imageOptimization": "Ensure all images are in WebP format, include proper size attributes, and implement lazy loading to improve performance.",
+    "bestPractices": "Always follow common best practices for optimization in React and Next.js applications, ensuring minimized load times and efficient use of resources."
+  },
+  "debugging": {
+    "errorAnalysis": "Always analyze and fix errors step-by-step. Avoid resolving multiple errors in parallel to prevent confusion and ensure robust solutions.",
+    "folderStructure": {
+      "checkFolders": "Before adding any folder or file, ensure the folder exists within /src/*. Do not add folders directly in the root ./ directory.",
+      "maintainHierarchy": "Maintain the structured hierarchy of components, hooks, contexts, and pages as per the existing directory setup."
+    }
+  },
+  "supabaseIntegration": {
+    "authUsage": "Supabase is used as the database for authentication in (auth) and its related pages (login/page.tsx, actions.tsx), along with support from Supabase SSR in /utils/supabase/server.ts, /client.ts, and /middleware.ts.",
+    "functions": {
+      "quality": "Write and query functions for Supabase that are clear, comprehensive, and easy to use, reducing the chance of errors.",
+      "typing": "Use TypeScript to type all Supabase interactions, ensuring that all database queries and mutations are properly type-checked."
+    },
+    "errorPrevention": {
+      "typeChecking": "Before writing any Supabase-related code, ensure that you check the types and interfaces. If custom types are required, create or update files in the /types directory (types/*.ts, types/*.d.ts) to maintain proper typing for all Supabase functions.",
+      "bestPractices": "Follow Supabase best practices for querying and mutating data, ensuring efficient and safe database interactions."
+    }
+  },
+  "folderStructureAdherence": {
+    "appStructure": {
+      "auth": "Auth-related pages go under (auth).",
+      "protected": "Protected pages such as admin, dashboard, and knowledge management go under (protected).",
+      "public": "Publicly accessible pages (e.g., about, blog, pricing) go under (public)."
+    },
+    "components": "Place reusable UI components like buttons, dialogs, and form elements in /components/ui/.",
+    "hooks": "Custom hooks go under /hooks/ (e.g., useToast, useUser, useBlogPosts).",
+    "libAndUtilities": "Utility functions and external API helpers should go under /lib/ (e.g., utils.ts).",
+    "types": "All custom types and type definitions should reside in /types/.",
+    "rootFolderCheck": "If multiple folders (including /app, /components, /hooks, /lib, /utils, /types) are found in the root directory and there is no /src folder, do not create a /src directory. Instead, locate the correct file in the existing structure. If a /src folder is present, always search for the mentioned folders inside the /src directory.",
+    "apiRoutes": "Whenever a new component or page is created under /app/* or /components/*, ensure to also create a corresponding /app/api/*/*/route.ts file for handling API calls."
+  },
+  "outputExpectations": {
+    "compliance": "Ensure the final output complies with the latest TypeScript standards, adheres to a strict project structure, and maintains performance optimizations.",
+    "fileLocation": "All files must be placed in their appropriate directories within /src and follow naming, styling, and performance best practices.",
+    "codeQualities": "Every piece of code should be structured, modular, and scalable.",
+    "filePaths": "Ensure all import paths are accurate and use the correct aliases as defined in the project's tsconfig.json or other configuration files."
+  },
+  "referenceSources": [
+    "@Nextjs",
+    "@vercel-nextjs",
+    "@typeerrors",
+    "@shadcn"
+  ],
+  "conclusion": "By adhering to these instructions, your code will maintain strict type safety, prevent common errors, and follow best practices for scalability and performance in a modern Next.js and Supabase codebase."
+}
