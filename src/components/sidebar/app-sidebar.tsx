@@ -3,10 +3,10 @@
 import * as React from "react"
 import * as Icons from "lucide-react"
 import { Command } from "lucide-react"
-import { NavMain } from "@/components/Bar/nav-main"
-import { NavProjects } from "@/components/Bar/nav-projects"
-import { NavSecondary } from "@/components/Bar/nav-secondary"
-import { NavUser } from "@/components/Bar/nav-user"
+import { NavMain } from "@/components/sidebar/nav-main"
+import { NavProjects } from "@/components/sidebar/nav-projects"
+import { NavSecondary } from "@/components/sidebar/nav-secondary"
+import { NavUser } from "@/components/sidebar/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/sidebar/Sidebar"
 import { usePathname } from "next/navigation"
 
 interface NavItem {

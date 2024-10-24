@@ -36,6 +36,7 @@ export const routes = {
     users: "/api/users",
     auth: "/api/auth",
     admin: "/api/admin",
+    authCallback: "/api/auth/confirm",
   },
 } as const;
 

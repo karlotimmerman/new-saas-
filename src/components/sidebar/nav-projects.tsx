@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -50,7 +51,7 @@ export function NavProjects() {
                     pathname === project.url && "bg-muted font-medium"
                   )}
                 >
-                  <Link href={project.url}>
+                  <Link href={project.url as string}>
                     <Icon className="mr-2 h-4 w-4" />
                     {project.name}
                   </Link>

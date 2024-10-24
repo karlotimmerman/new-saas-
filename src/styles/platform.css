@@ -1,0 +1,60 @@
+/* Import the base styles from globals.css */
+@import 'globals.css';
+
+/* Platform-specific styles */
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .sidebar {
+    @apply w-64 bg-card text-card-foreground;
+  }
+
+  .main-content {
+    @apply flex-1 overflow-y-auto;
+  }
+
+  .container-custom {
+    @apply mx-auto py-6 px-4;
+  }
+
+  .platform-button {
+    @apply px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors;
+  }
+
+  .platform-card {
+    @apply bg-card text-card-foreground rounded-lg shadow-md p-4;
+  }
+
+  .platform-input {
+    @apply border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.platform-specific-class {
+  /* Add platform-specific styles here */
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    @apply w-16;
+  }
+
+  .container-custom {
+    @apply px-2;
+  }
+}
+
+.dark {
+  /* Dark mode styles are already handled in globals.css */
+}

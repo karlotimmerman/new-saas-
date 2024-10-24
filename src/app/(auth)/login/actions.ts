@@ -1,33 +1,10 @@
 "use server"
 
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Database } from "@/types/supabase";
 import { routes } from "@/config/routes";
-
-function getSupabase() {
-  const cookieStore = cookies();
-  
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set(name, value, options);
-        },
-        remove(name: string, options: CookieOptions) {
-          cookieStore.set(name, "", { ...options, maxAge: 0 });
-        },
-      },
-    }
-  );
-}
 
 async function syncUserWithPrisma(user: Database["auth"]["users"]) {
   try {
@@ -62,7 +39,7 @@ async function syncUserWithPrisma(user: Database["auth"]["users"]) {
 }
 
 export async function login(formData: FormData): Promise<{ error?: string }> {
-  const supabase = getSupabase();
+  const supabase = createClient();
   
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -103,7 +80,7 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
 }
 
 export async function signup(formData: FormData): Promise<{ error?: string }> {
-  const supabase = getSupabase();
+  const supabase = createClient();
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;

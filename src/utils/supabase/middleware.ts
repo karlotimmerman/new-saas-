@@ -1,162 +1,63 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr"
-import { NextResponse, type NextRequest } from "next/server"
-import type { Database } from "@/types/supabase"
-import type { AuthenticatedRequest, UserRole } from "@/types/middleware"
-import { prisma } from "@/lib/prisma"
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-// Function to determine user role from metadata
-function determineUserRole(metadata: Record<string, unknown> | undefined): UserRole {
-  if (metadata?.is_admin) return "admin"
-  if (metadata?.is_team_owner) return "team-owner"
-  return "user"
-}
-
-// Function to validate team access
-async function validateTeamAccess(userId: string, teamId: string) {
-  const member = await prisma.teamMember.findUnique({
-    where: {
-      teamId_userId: {
-        teamId,
-        userId
-      }
-    }
-  })
-  return member?.role || null
-}
-
-export async function updateSession(
-  request: NextRequest,
-): Promise<NextResponse> {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+export async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
   })
 
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+        getAll() {
+          return request.cookies.getAll()
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
           })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: "",
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: "",
-            ...options,
-          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
-    },
+    }
   )
 
-  try {
-    const { data: { session } } = await supabase.auth.getSession()
+  // IMPORTANT: Avoid writing any logic between createServerClient and
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // issues with users being randomly logged out.
 
-    if (session?.user) {
-      // Determine user role
-      const userRole = determineUserRole(session.user.user_metadata)
-      
-      // Add base user info to headers
-      response.headers.set("x-user-id", session.user.id)
-      response.headers.set("x-user-role", userRole)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-      // Handle team context if present
-      const teamId = session.user.user_metadata?.team_id as string | undefined
-      if (teamId) {
-        try {
-          const teamRole = await validateTeamAccess(session.user.id, teamId)
-          if (teamRole) {
-            response.headers.set("x-team-id", teamId)
-            response.headers.set("x-team-role", teamRole)
-          }
-        } catch (error) {
-          console.error("Team validation error:", error)
-        }
-      }
-
-      // Check if session needs refresh
-      if (session.expires_at && session.expires_at * 1000 < Date.now() + 60_000) {
-        const { data: refreshData } = await supabase.auth.refreshSession()
-        if (refreshData.session) {
-          response.headers.set("x-session-refreshed", "true")
-        }
-      }
-
-      // Sync with Prisma (minimal sync in middleware)
-      await prisma.user.update({
-        where: { id: session.user.id },
-        data: { lastActive: new Date() }
-      }).catch(console.error) // Non-blocking update
-    }
-
-    return response
-  } catch (error) {
-    console.error("Session update error:", error)
-    return response
+  if (
+    !user &&
+    !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/auth')
+  ) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
-}
 
-// Helper to get user info from request
-export function getUserFromRequest(req: Request): AuthenticatedRequest {
-  const userRole = req.headers.get("x-user-role") as UserRole | null
-  const teamRole = req.headers.get("x-team-role") as string | null
+  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
+  // creating a new response object with NextResponse.next() make sure to:
+  // 1. Pass the request in it, like so:
+  //    const myNewResponse = NextResponse.next({ request })
+  // 2. Copy over the cookies, like so:
+  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
+  // 3. Change the myNewResponse object to fit your needs, but avoid changing
+  //    the cookies!
+  // 4. Finally:
+  //    return myNewResponse
+  // If this is not done, you may be causing the browser and server to go out
+  // of sync and terminate the user's session prematurely!
 
-  return {
-    userId: req.headers.get("x-user-id") ?? "",
-    userRole: userRole ?? "user",
-    isAdmin: userRole === "admin",
-    isTeamOwner: userRole === "team-owner",
-    teamAccess: teamRole ? [{
-      teamId: req.headers.get("x-team-id") ?? "",
-      role: teamRole as "OWNER" | "ADMIN" | "MEMBER"
-    }] : undefined,
-    sessionRefreshed: req.headers.get("x-session-refreshed") === "true"
-  }
-}
-
-// Helper to check team access
-export function hasTeamAccess(
-  req: Request,
-  requiredRole: "OWNER" | "ADMIN" | "MEMBER" | "ANY" = "ANY"
-): boolean {
-  const user = getUserFromRequest(req)
-  
-  if (user.isAdmin) return true
-  if (!user.teamAccess?.length) return false
-  
-  const teamRole = user.teamAccess[0].role
-  if (requiredRole === "ANY") return true
-  if (requiredRole === "OWNER") return teamRole === "OWNER"
-  if (requiredRole === "ADMIN") return ["OWNER", "ADMIN"].includes(teamRole)
-  return true
+  return supabaseResponse
 }

@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from "@supabase/ssr"
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import type { Database } from "@/types/supabase"
@@ -109,80 +109,9 @@ async function handleTeamOwnerRoute(
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient<Database>({ req, res })
-
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    const protectionLevel = determineRouteProtection(req.nextUrl.pathname)
-
-    // Handle public routes
-    if (protectionLevel === "public") {
-      if (session) {
-        return NextResponse.redirect(new URL(routes.dashboard, req.url))
-      }
-      return res
-    }
-
-    // Handle unauthenticated users
-    if (!session) {
-      const redirectUrl = new URL(routes.login, req.url)
-      redirectUrl.searchParams.set("redirectTo", req.nextUrl.pathname)
-      return NextResponse.redirect(redirectUrl)
-    }
-
-    // Handle authenticated routes
-    const authCheck = await handleAuthenticatedRoute(supabase, req)
-    if (!authCheck.success) {
-      return NextResponse.redirect(new URL(authCheck.redirect!, req.url))
-    }
-
-    // Handle role-specific routes
-    switch (protectionLevel) {
-      case "admin": {
-        const adminCheck = await handleAdminRoute(supabase)
-        if (!adminCheck.success) {
-          return NextResponse.redirect(new URL(adminCheck.redirect!, req.url))
-        }
-        break
-      }
-      case "team-owner": {
-        const teamOwnerCheck = await handleTeamOwnerRoute(supabase, req.nextUrl.pathname)
-        if (!teamOwnerCheck.success) {
-          return NextResponse.redirect(new URL(teamOwnerCheck.redirect!, req.url))
-        }
-        break
-      }
-    }
-
-    // Add user context to headers
-    if (session) {
-      const userRole = getUserRole(session.user.user_metadata)
-      res.headers.set("x-user-id", session.user.id)
-      res.headers.set("x-user-role", userRole)
-      res.headers.set(
-        "x-team-owner", 
-        (userRole === "team-owner").toString()
-      )
-      
-      // Add team info if available
-      if (session.user.user_metadata?.team_id) {
-        res.headers.set("x-team-id", session.user.user_metadata.team_id)
-      }
-    }
-
-    return res
-  } catch (error) {
-    console.error("Middleware error:", error)
-    
-    if (!req.nextUrl.pathname.startsWith("/(auth)")) {
-      return NextResponse.redirect(new URL(routes.login, req.url))
-    }
-    
-    return res
-  }
+  const supabase = createMiddlewareClient({ req, res })
+  await supabase.auth.getSession()
+  return res
 }
 
 export const config = {

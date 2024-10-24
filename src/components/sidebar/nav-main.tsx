@@ -54,7 +54,7 @@ export function NavMain() {
                 </Button>
                 {item.items?.length > 0 && (
                   <div className="ml-6 mt-1 space-y-1">
-                    {item.items.map((subItem) => (
+                    {item.items.map((subItem: NavItem) => (
                       <Button
                         key={subItem.title}
                         asChild

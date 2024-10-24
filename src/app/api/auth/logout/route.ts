@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -16,7 +16,7 @@ interface CookieOptions {
 export async function POST() {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -49,10 +49,9 @@ export async function POST() {
         },
       });
     }
-
     // Clear cookies
-    const cookies = cookieStore.getAll();
-    cookies.forEach(cookie => {
+    const allCookies: { name: string }[] = cookieStore.getAll();
+    allCookies.forEach((cookie) => {
       cookieStore.set(cookie.name, "", { maxAge: 0 });
     });
 

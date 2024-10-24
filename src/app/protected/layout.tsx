@@ -1,5 +1,6 @@
 import React from "react";
-import { PlatformSidebar } from "@/components/PlatformSidebar";
+import Sidebar from "@/components/ui/Sidebar";
+import "@/styles/platform.css";
 
 export default function ProtectedLayout({
   children,
@@ -8,7 +9,7 @@ export default function ProtectedLayout({
 }) {
   return (
     <div className="flex h-screen bg-background">
-      <PlatformSidebar />
+      <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="container mx-auto py-6 px-4">{children}</div>
       </main>
