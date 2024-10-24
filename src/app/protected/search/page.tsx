@@ -3,7 +3,7 @@
 import { CopilotKit } from "@copilotkit/react-core";
 import Main from "./Main";
 
-export default function Home() {
+export default function SearchPage() {
   return (
     <CopilotKit
       runtimeUrl="/api/copilotkit"

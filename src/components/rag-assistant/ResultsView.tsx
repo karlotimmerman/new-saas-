@@ -21,7 +21,7 @@ export function ResultsView() {
   console.log("AGENT_STATE", agentState);
 
   const steps =
-    agentState?.steps?.map((step: any) => {
+    agentState?.steps?.map((step: any /* TODO: Replace with specific type */) => {
       return {
         description: step.description || "",
         status: step.status || "pending",
@@ -72,7 +72,7 @@ export function ResultsView() {
               </h2>
               <ul className="text-slate-900 font-light text-sm flex flex-col gap-y-2">
                 {agentState?.answer?.references?.map(
-                  (ref: any, idx: number) => (
+                  (ref: any /* TODO: Replace with specific type */, idx: number) => (
                     <li key={idx}>
                       <a
                         href={ref.url}

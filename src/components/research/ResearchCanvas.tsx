@@ -12,7 +12,6 @@ import { Progress } from "./Progress";
 import { EditResourceDialog } from "./EditResourceDialog";
 import { AddResourceDialog } from "./AddResourceDialog";
 import { Resources } from "./Resources";
-import { truncateUrl } from "@/lib/utils";
 import { Resource } from "@/lib/types";
 
 export function ResearchCanvas() {
@@ -22,7 +21,6 @@ export function ResearchCanvas() {
 
   useCoAgentStateRender({
     name: "research_agent",
-    render: ({ state, nodeName, status }) => {
       if (!state.logs || state.logs.length === 0) {
         return null;
       }
@@ -39,7 +37,6 @@ export function ResearchCanvas() {
         type: "string[]",
       },
     ],
-    renderAndWait: ({ args, status, handler }) => {
       return (
         <div className="">
           <div className="font-bold text-base mb-2">
@@ -51,7 +48,6 @@ export function ResearchCanvas() {
             )}
             customWidth={200}
           />
-          {status === "executing" && (
             <div className="mt-4 flex justify-start space-x-2">
               <button
                 onClick={() => handler("NO")}

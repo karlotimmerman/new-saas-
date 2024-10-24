@@ -1,0 +1,22 @@
+{
+    "setupTasks": [
+      {
+        "name": "Install Poetry",
+        "command": "curl -sSL https://install.python-poetry.org | python3 -"
+      },
+      {
+        "name": "Install Backend Dependencies",
+        "command": "cd backend && poetry install"
+      }
+    ],
+    "tasks": {
+      "serve-backend": {
+        "name": "Serve Backend",
+        "command": "cd backend && poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+        "runAtStart": true,
+        "preview": {
+          "port": 8000
+        }
+      }
+    }
+  }

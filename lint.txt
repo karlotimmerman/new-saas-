@@ -1,0 +1,5 @@
+
+> ai-researcher-demo@0.1.0 lint /home/karlo/saas-nw/new-saas
+> next lint
+
+ ELIFECYCLE  Command failed with exit code 1.

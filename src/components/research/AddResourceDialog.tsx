@@ -75,7 +75,7 @@ export function AddResourceDialog({
             id="new-description"
             placeholder="Resource Description"
             value={newResource.description || ""}
-            onChange={(e) =>
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setNewResource({
                 ...newResource,
                 description: e.target.value,

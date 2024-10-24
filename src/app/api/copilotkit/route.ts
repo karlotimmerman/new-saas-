@@ -26,3 +26,8 @@ export const POST = async (req: NextRequest) => {
 
   return handleRequest(req);
 };
+
+// The handleDataVisualization function is now handled by the Python backend
+// So we don't need to define it here anymore
+
+// We don't need to manually add the action here as it's handled by the remote actions setup
